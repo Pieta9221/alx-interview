@@ -1,23 +1,23 @@
 #!/usr/bin/node
 
-const request = require('request');
+const axios = require('axios');
 
 const movieId = process.argv[2];
 
 const url = `https://swapi-api.hbtn.io/api/films/${movieId}`;
 
-request(url, async (err, res, body) => {
-  err && console.log(err);
-
-  const charactersArray = (JSON.parse(res.body).characters);
-  for (const character of charactersArray) {
-    await new Promise((resolve, reject) => {
-      request(character, (err, res, body) => {
-        err && console.log(err);
-
-        console.log(JSON.parse(body).name);
-        resolve();
-      });
-    });
-  }
-});
+axios.get(url)
+  .then(async (response) => {
+    const charactersArray = response.data.characters;
+    for (const character of charactersArray) {
+      try {
+        const characterResponse = await axios.get(character);
+        console.log(characterResponse.data.name);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
